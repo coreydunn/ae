@@ -1,16 +1,12 @@
+; vi: ft=nasm
+
 %include 'buffer.inc'
-buffer_size equ 16777216
-section .bss
-buffer: resb buffer_size
-buffer_idx: resd 1
 
 section .data
-f01: db '%d',10,0
-str01: db '/tmp/file.txt',0
 
 section .text
 global main
-extern exit,print,cpy,rd,printf
+extern exit,buf_print,buf_cpy,buf_read,printf
 main:
 	push rbp
 	mov rbp,rsp
@@ -27,19 +23,17 @@ main:
 	jl .L01
 	mov rdi,[rsp+argv]
 	mov rdi,[rdi+8]
-	call rd
+	call buf_read
 .L01:
 
 	mov dil,'E'
-	call cpy
+	call buf_cpy
 	mov dil,'N'
-	call cpy
+	call buf_cpy
 	mov dil,'D'
-	call cpy
+	call buf_cpy
 
-	; print buffer
-	mov rdi,str01
-	call print
+	call buf_print
 
 	mov edi,55
 	call exit

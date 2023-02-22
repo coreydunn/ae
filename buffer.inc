@@ -1,15 +1,24 @@
+; vi: ft=nasm
+
+buffer_size equ 16777216
+O_RDWR equ      0x2
+
+section .bss
+buffer: resb buffer_size
+buffer_idx: resd 1
+
 section .data
-fmt: db '%s',0
+
 section .text
-global print,cpy,rd
+global buf_print,buf_cpy,buf_read
 extern puts,printf,strcpy,read,open
-print:
+buf_print:
 	mov rdi,buffer
 	call puts
 	ret
 
 ; cpy(char)
-cpy:
+buf_cpy:
 	xor rax,rax
 	mov eax,[buffer_idx]
 	mov [buffer+rax],dil
@@ -17,13 +26,12 @@ cpy:
 	ret
 
 ; rd(char*filename)
-rd:
+buf_read:
 	push rbp
 	mov rbp,rsp
 	sub rsp,12
 %define fd    -4
 %define filen -12
-%define O_RDWR 0x2
 
 	;mov dword[rsp+fd],0
 	mov [rsp+filen],rdi
@@ -47,4 +55,3 @@ rd:
 	ret
 %undef fd
 %undef filen
-%undef O_RDWR
