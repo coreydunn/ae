@@ -1,0 +1,10 @@
+1. buffer
+	*a. static allocation
+	*b. print
+	*c. memcpy
+2. file i/o
+	*a. open
+	b. write
+3. command interpreter
+	a. insert/append
+	b. terminate
