@@ -1,10 +1,11 @@
 CC=       cc
 CFLAGS=   -Wfatal-errors -g
-LDFLAGS=   -no-pie
+LDFLAGS=  -no-pie
+ASMFLAGS= -felf64 -F dwarf -g
 
 all: ae
 main.o: main.asm buffer.inc
-	nasm -f elf64 $<
+	nasm $(ASMFLAGS) $<
 %.o: %.asm
 	nasm $^ -felf64
 ae: main.o buffer.inc
