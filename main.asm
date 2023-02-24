@@ -3,7 +3,6 @@
 %include 'buffer.inc'
 
 section .data
-f01: db "filen: '%s'",10,0
 
 section .text
 global main
@@ -26,11 +25,6 @@ main:
 	mov rdi,[rdi+8]
 	call buf_read
 .L01:
-
-	; print filename
-	xor rax,rax
-	lea rdi,[buffer_filen]
-	call puts
 
 	call buf_print
 

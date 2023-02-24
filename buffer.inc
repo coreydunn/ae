@@ -41,11 +41,10 @@ buf_read:
 	; copy filename to buffer_filen
 	xor rcx,rcx
 .l01:
-	cmp byte[rsp+filen+rcx],0
-	jz .l01e
 	mov rdi,[rsp+filen]
 	mov al,[rdi+rcx]
-	;mov al,[rsp+filen+rcx]
+	cmp al,0
+	jz .l01e
 	mov [buffer_filen+rcx],al
 	inc rcx
 	jmp .l01
