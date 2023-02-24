@@ -1,17 +1,19 @@
 ; vi: ft=nasm
 
 buffer_size equ 16777216
+buffer_filen_size equ 4096
 O_RDWR equ      0x2
 
 section .bss
 buffer: resb buffer_size
 buffer_idx: resd 1
+buffer_filen: resb buffer_filen_size
 
 section .data
 
 section .text
 global buf_print,buf_cpy,buf_read
-extern puts,printf,strcpy,read,open
+extern puts,printf,strcpy,read,open,memcpy
 buf_print:
 	mov rdi,buffer
 	call puts
@@ -36,6 +38,17 @@ buf_read:
 	;mov dword[rsp+fd],0
 	mov [rsp+filen],rdi
 
+	; copy filename to buffer_filen
+	xor rcx,rcx
+.l01:
+	cmp byte[rsp+filen+rcx],0
+	jz .l01e
+	mov al,[rsp+filen+rcx]
+	mov [buffer_filen+rcx],al
+	inc rcx
+.l01e:
+
+	; read file contents into buffer
 	mov rdi,[rsp+filen]
 	mov esi,O_RDWR
 	call open
@@ -43,6 +56,7 @@ buf_read:
 	cmp eax,-1
 	jz .end
 
+	; read file into buffer
 	mov edi,[rsp+fd]
 	mov rsi,buffer
 	mov edx,buffer_size

@@ -3,6 +3,7 @@
 %include 'buffer.inc'
 
 section .data
+f01: db "filen: '%s'",10,0
 
 section .text
 global main
@@ -24,18 +25,17 @@ main:
 	mov rdi,[rsp+argv]
 	mov rdi,[rdi+8]
 	call buf_read
+
 .L01:
 
-	mov dil,'E'
-	call buf_cpy
-	mov dil,'N'
-	call buf_cpy
-	mov dil,'D'
-	call buf_cpy
+	; print filename
+	xor rax,rax
+	lea rdi,[buffer_filen]
+	call puts
 
 	call buf_print
 
-	mov edi,55
+	xor edi,edi
 	call exit
 %undef argv
 %undef argc
