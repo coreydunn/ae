@@ -1,8 +1,11 @@
 ; vi: ft=nasm
 
-buffer_size equ 16777216
+buffer_size       equ 16777216
 buffer_filen_size equ 4096
-O_RDWR equ      0x2
+O_RDONLY          equ 0x00
+O_WRONLY          equ 0x01
+O_RDWR            equ 0x02
+O_CREAT           equ 0x40
 
 section .bss
 buffer: resb buffer_size
@@ -11,10 +14,11 @@ buffer_filen: resb buffer_filen_size
 
 section .data
 f01: db "writing '%s'",10,0
+f02: db "error: failed opening file '%s'",10,0
 
 section .text
 global buf_print,buf_cpy,buf_read,buf_write
-extern puts,printf,strcpy,read,open,memcpy,close
+extern puts,printf,strcpy,read,open,memcpy,close,write
 buf_print:
 	mov rdi,buffer
 	call puts
@@ -53,7 +57,7 @@ buf_read:
 
 	; read file contents into buffer
 	mov rdi,[rsp+filen]
-	mov esi,O_RDWR
+	mov esi,O_RDONLY
 	call open
 	mov [rsp+fd],eax
 	cmp eax,-1
@@ -90,37 +94,36 @@ buf_write:
 	jz .end
 	mov [rsp+filen],rdi
 
-	mov rdi,f01
+	lea rdi,[f01]
 	mov rsi,[rsp+filen]
 	call printf
 
 	; open file
 	lea rdi,[rsp+filen]
-	mov rsi,O_RDWR
+	mov rsi,O_WRONLY|O_CREAT
+	mov edx,0x1a4
 	call open
 	mov [rsp+fd],eax
+	cmp eax,-1
+	jz .fail
 
-	xor rcx,rcx
-.l01:
-	lea rsi,[rsp+filen]
-	mov al,[rsi+rcx]
-	cmp al,0
-	jz .l01e
-
-	mov [rsp-20],al
-	mov byte[rsp-21],0
-	lea rdi,[rsp-20]
-	call puts
-
-	inc ecx
-	jmp .l01
-.l01e:
+	; write to file
+	mov edi,[rsp+fd]
+	;mov edi,1
+	lea rsi,[buffer]
+	mov rdx,64
+	call write
 
 	; close file
-	cmp dword[rsp+fd],-1
-	jz .end
 	mov edi,[rsp+fd]
 	call close
+
+	jmp .end
+.fail:
+	xor rax,rax
+	lea rdi,[f02]
+	lea rsi,[rsp+filen]
+	call printf
 
 .end:
 	pop rbp
