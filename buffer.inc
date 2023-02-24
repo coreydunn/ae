@@ -10,10 +10,11 @@ buffer_idx: resd 1
 buffer_filen: resb buffer_filen_size
 
 section .data
+f01: db "writing '%s'",10,0
 
 section .text
-global buf_print,buf_cpy,buf_read
-extern puts,printf,strcpy,read,open,memcpy
+global buf_print,buf_cpy,buf_read,buf_write
+extern puts,printf,strcpy,read,open,memcpy,close
 buf_print:
 	mov rdi,buffer
 	call puts
@@ -65,9 +66,65 @@ buf_read:
 	call read
 	mov [buffer_idx],eax
 
+	cmp dword[rsp+fd],-1
+	jz .end
+	mov edi,[rsp+fd]
+	call close
+
 .end:
 	pop rbp
 	add rsp,12
+	ret
+%undef fd
+%undef filen
+
+; buf_write(char*filename)
+buf_write:
+	push rbp
+	mov rbp,rsp
+	sub rsp,64
+%define fd -4
+%define filen -12
+
+	cmp rdi,0
+	jz .end
+	mov [rsp+filen],rdi
+
+	mov rdi,f01
+	mov rsi,[rsp+filen]
+	call printf
+
+	; open file
+	lea rdi,[rsp+filen]
+	mov rsi,O_RDWR
+	call open
+	mov [rsp+fd],eax
+
+	xor rcx,rcx
+.l01:
+	lea rsi,[rsp+filen]
+	mov al,[rsi+rcx]
+	cmp al,0
+	jz .l01e
+
+	mov [rsp-20],al
+	mov byte[rsp-21],0
+	lea rdi,[rsp-20]
+	call puts
+
+	inc ecx
+	jmp .l01
+.l01e:
+
+	; close file
+	cmp dword[rsp+fd],-1
+	jz .end
+	mov edi,[rsp+fd]
+	call close
+
+.end:
+	pop rbp
+	add rsp,64
 	ret
 %undef fd
 %undef filen
