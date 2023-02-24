@@ -19,7 +19,7 @@ buf_print:
 	call puts
 	ret
 
-; cpy(char)
+; buf_cpy(char)
 buf_cpy:
 	xor rax,rax
 	mov eax,[buffer_idx]
@@ -27,7 +27,7 @@ buf_cpy:
 	inc dword[buffer_idx]
 	ret
 
-; rd(char*filename)
+; buf_read(char*filename)
 buf_read:
 	push rbp
 	mov rbp,rsp
@@ -43,9 +43,12 @@ buf_read:
 .l01:
 	cmp byte[rsp+filen+rcx],0
 	jz .l01e
-	mov al,[rsp+filen+rcx]
+	mov rdi,[rsp+filen]
+	mov al,[rdi+rcx]
+	;mov al,[rsp+filen+rcx]
 	mov [buffer_filen+rcx],al
 	inc rcx
+	jmp .l01
 .l01e:
 
 	; read file contents into buffer

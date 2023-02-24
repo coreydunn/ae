@@ -25,7 +25,6 @@ main:
 	mov rdi,[rsp+argv]
 	mov rdi,[rdi+8]
 	call buf_read
-
 .L01:
 
 	; print filename
